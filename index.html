@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>GAME VIP TOÁN LỚP 2</title>
+
+<style>
+body{
+    font-family: Arial;
+    background: linear-gradient(to right,#89f7fe,#66a6ff);
+    margin:0;
+    padding:0;
+}
+.container{
+    max-width:900px;
+    margin:auto;
+    background:white;
+    padding:20px;
+    border-radius:20px;
+    margin-top:20px;
+    box-shadow:0 0 20px rgba(0,0,0,0.2);
+}
+h1{text-align:center;}
+
+.topbar{
+    display:flex;
+    justify-content:space-between;
+    font-weight:bold;
+    margin-bottom:10px;
+}
+
+.question{
+    margin:15px 0;
+}
+
+.dropzone{
+    display:inline-block;
+    min-width:120px;
+    padding:10px;
+    border:2px dashed #999;
+    border-radius:10px;
+    text-align:center;
+    margin-left:10px;
+}
+
+.option{
+    display:inline-block;
+    background:#4CAF50;
+    color:white;
+    padding:10px;
+    margin:5px;
+    border-radius:10px;
+    cursor:grab;
+}
+
+button{
+    padding:12px 25px;
+    margin-top:20px;
+    font-size:16px;
+    border:none;
+    border-radius:10px;
+    background:#ff9800;
+    color:white;
+    cursor:pointer;
+}
+
+.correct{background:#c8f7c5;border-color:green;}
+.wrong{background:#ffcdd2;border-color:red;}
+
+#character{
+    background:#fff3cd;
+    padding:10px;
+    border-radius:10px;
+    margin-bottom:10px;
+}
+
+#result{
+    text-align:center;
+    font-size:20px;
+    margin-top:20px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<h1>🎮 GAME TOÁN VIP LỚP 2</h1>
+
+<div class="topbar">
+<div>⏱️ Thời gian: <span id="time">60</span>s</div>
+<div>⭐ Điểm: <span id="score">0</span></div>
+</div>
+
+<div id="character">👧 Cô bé: Nào! Kéo đáp án đúng nhé!</div>
+
+<div id="game"></div>
+
+<div id="options"></div>
+
+<center><button onclick="check()">✅ Kiểm tra</button></center>
+
+<div id="result"></div>
+
+</div>
+
+<!-- Âm thanh -->
+<audio id="correctSound" src="https://www.soundjay.com/buttons/sounds/button-3.mp3"></audio>
+<audio id="wrongSound" src="https://www.soundjay.com/buttons/sounds/button-10.mp3"></audio>
+
+<script>
+let questions = [
+{q:"456 km đọc là:",a:"B"},
+{q:"Số liền trước 290:",a:"289"},
+{q:"Số lớn nhất:",a:"1 km"},
+{q:"549 + 129 =",a:"678"},
+{q:"30 : 5 =",a:"6"},
+{q:"876 - 305 =",a:"571"}
+];
+
+let optionsAll = ["B","289","1 km","678","6","571"];
+
+let selected = questions.sort(()=>0.5-Math.random()).slice(0,5);
+
+let game = document.getElementById("game");
+
+selected.forEach((item,i)=>{
+    game.innerHTML += `
+    <div class="question">
+    ${i+1}. ${item.q}
+    <div class="dropzone" data-answer="${item.a}"></div>
+    </div>
+    `;
+});
+
+let optionsBox = document.getElementById("options");
+optionsAll.sort(()=>0.5-Math.random()).forEach(o=>{
+    optionsBox.innerHTML += `<div class="option" draggable="true">${o}</div>`;
+});
+
+let dragged=null;
+document.querySelectorAll(".option").forEach(o=>{
+    o.addEventListener("dragstart",()=>dragged=o);
+});
+
+document.querySelectorAll(".dropzone").forEach(z=>{
+    z.addEventListener("dragover",e=>e.preventDefault());
+    z.addEventListener("drop",function(){
+        this.innerHTML="";
+        this.appendChild(dragged);
+    });
+});
+
+let time=60;
+let timer=setInterval(()=>{
+    time--;
+    document.getElementById("time").innerText=time;
+
+    if(time<=0){
+        clearInterval(timer);
+        check();
+    }
+},1000);
+
+function check(){
+    let correct=0;
+
+    document.querySelectorAll(".dropzone").forEach(z=>{
+        let ans=z.getAttribute("data-answer");
+        let user=z.innerText.trim();
+
+        z.classList.remove("correct","wrong");
+
+        if(user===ans){
+            correct++;
+            z.classList.add("correct");
+            document.getElementById("correctSound").play();
+        }else{
+            z.classList.add("wrong");
+            document.getElementById("wrongSound").play();
+        }
+    });
+
+    document.getElementById("score").innerText=correct;
+
+    let msg="";
+    if(correct==5) msg="🏆 Xuất sắc!";
+    else if(correct>=3) msg="👍 Tốt lắm!";
+    else msg="💪 Cố gắng thêm nhé!";
+
+    document.getElementById("result").innerHTML=
+    `🎉 Bạn đúng ${correct}/5 câu<br>${msg}`;
+
+    confetti();
+}
+
+// hiệu ứng giấy bay đơn giản
+function confetti(){
+    for(let i=0;i<50;i++){
+        let div=document.createElement("div");
+        div.style.position="fixed";
+        div.style.width="8px";
+        div.style.height="8px";
+        div.style.background="red";
+        div.style.top=Math.random()*window.innerHeight+"px";
+        div.style.left=Math.random()*window.innerWidth+"px";
+        document.body.appendChild(div);
+        setTimeout(()=>div.remove(),1000);
+    }
+}
+</script>
+
+</body>
+</html>
